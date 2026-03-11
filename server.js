@@ -11,6 +11,7 @@ app.use(express.json());
 ============================ */
 
 function calculateLeadScore(data) {
+
   let score = 0;
 
   // Budget scoring
@@ -19,23 +20,23 @@ function calculateLeadScore(data) {
 
     if (budget.includes("5l") || budget.includes("10l") || budget.includes("1cr"))
       score += 40;
-    else if (budget.includes("1l"))
-      score += 25;
+    else if (budget.includes("2l") || budget.includes("1l"))
+      score += 30;
     else if (budget.includes("50k"))
-      score += 15;
+      score += 20;
     else
-      score += 5;
+      score += 10;
   }
 
   // Timeline scoring
   if (data.timeline) {
     const timeline = data.timeline.toLowerCase();
 
-    if (timeline.includes("urgent"))
+    if (timeline.includes("1 week") || timeline.includes("urgent"))
       score += 30;
-    else if (timeline.includes("1 month"))
+    else if (timeline.includes("2 week") || timeline.includes("3 week"))
       score += 20;
-    else if (timeline.includes("3 month"))
+    else
       score += 10;
   }
 
@@ -43,10 +44,17 @@ function calculateLeadScore(data) {
   if (data.service) {
     const service = data.service.toLowerCase();
 
-    if (service.includes("website"))
+    if (service.includes("website") || service.includes("web"))
+      score += 15;
+    else if (service.includes("app"))
       score += 20;
-    if (service.includes("ai"))
-      score += 30;
+    else
+      score += 10;
+  }
+
+  // Industry scoring
+  if (data.industry) {
+    score += 10;
   }
 
   return score;
@@ -62,10 +70,14 @@ app.post("/chat", (req, res) => {
 
   let priority = "Cold";
 
-  if (score >= 80) priority = "HOT";
-  else if (score >= 50) priority = "Warm";
+if (score >= 70) {
+  priority = "Hot";
+}
+else if (score >= 40) {
+  priority = "Warm";
+}
 
-  const reply = `
+ const reply = `
 Service Request: ${req.body.service}
 Industry: ${req.body.industry}
 Estimated Budget: ${req.body.budget}
@@ -80,16 +92,26 @@ Estimated Timeline: 3–4 weeks
 Lead Score: ${score}
 Lead Priority: ${priority}
 
+Basic Project Proposal
+Features Included
+• Responsive Design
+• SEO Setup
+• Contact Form
+• Google Analytics
+• Admin Dashboard
+
 Recommendation: ${
 priority === "Hot"
-? "Schedule consultation immediately."
+? "Immediate consultation recommended."
 : priority === "Warm"
 ? "Follow up within 24 hours."
 : "Add to nurture list."
 }
 
-Next Step: Book a strategy call to discuss project details.
+Next Step:
+Book a strategy call to finalize the project scope.
 `;
+
 res.json({ reply });
 
 });
