@@ -90,6 +90,9 @@ priority === "Hot"
 
 Next Step: Book a strategy call to discuss project details.
 `;
+res.json({ reply });
+
+});
 
 /* ============================
    Start Server
