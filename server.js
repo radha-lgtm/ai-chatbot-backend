@@ -66,25 +66,30 @@ app.post("/chat", (req, res) => {
   else if (score >= 50) priority = "Warm";
 
   const reply = `
-Service: ${req.body.service}
+Service Request: ${req.body.service}
 Industry: ${req.body.industry}
 Estimated Budget: ${req.body.budget}
-Timeline: ${req.body.timeline}
+Timeline Requirement: ${req.body.timeline}
+
+Service Recommendation
+Suggested Package: Professional Business Website
+
+Estimated Price Range: ₹80,000 – ₹1,20,000
+Estimated Timeline: 3–4 weeks
 
 Lead Score: ${score}
 Lead Priority: ${priority}
 
 Recommendation: ${
-    priority === "HOT"
-      ? "Schedule consultation immediately."
-      : priority === "Warm"
-      ? "Follow up within 24 hours."
-      : "Add to nurture list."
-  }
-  `;
+priority === "Hot"
+? "Schedule consultation immediately."
+: priority === "Warm"
+? "Follow up within 24 hours."
+: "Add to nurture list."
+}
 
-  res.json({ reply });
-});
+Next Step: Book a strategy call to discuss project details.
+`;
 
 /* ============================
    Start Server
