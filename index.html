@@ -1,82 +1,172 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>AI Lead Qualification Chatbot</title>
+<title>AI Website Assistant</title>
+
 <style>
 body{
-font-family: Arial;
-background:#f4f4f4;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+font-family:Arial;
+background:#f5f5f5;
+height:2000px;
 }
 
-.chatbox{
+/* Chat Button */
+
+#chatButton{
+position:fixed;
+bottom:25px;
+right:25px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:50%;
+width:60px;
+height:60px;
+font-size:26px;
+cursor:pointer;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Chat Window */
+
+#chatWindow{
+position:fixed;
+bottom:100px;
+right:25px;
+width:320px;
 background:white;
-padding:20px;
 border-radius:10px;
-width:350px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+box-shadow:0 6px 20px rgba(0,0,0,0.2);
+display:none;
+flex-direction:column;
 }
 
-input,button{
-width:100%;
+#chatHeader{
+background:#007bff;
+color:white;
 padding:10px;
-margin:5px 0;
+border-radius:10px 10px 0 0;
+font-weight:bold;
 }
 
-#response{
-margin-top:10px;
-background:#eee;
+#chatMessages{
+height:250px;
+overflow-y:auto;
 padding:10px;
-border-radius:5px;
+font-size:14px;
 white-space:pre-line;
 }
+
+#chatInput{
+display:flex;
+border-top:1px solid #eee;
+}
+
+#chatInput input{
+flex:1;
+border:none;
+padding:10px;
+outline:none;
+}
+
+#chatInput button{
+background:#007bff;
+color:white;
+border:none;
+padding:10px 15px;
+cursor:pointer;
+}
 </style>
+
 </head>
 
 <body>
 
-<div class="chatbox">
-<h3>AI Lead Qualification</h3>
+<button id="chatButton" onclick="toggleChat()">💬</button>
 
-<input id="service" placeholder="Service (e.g. Website)">
-<input id="industry" placeholder="Industry (e.g. Finance)">
-<input id="budget" placeholder="Budget (e.g. 1L+)">
-<input id="timeline" placeholder="Timeline (e.g. Urgent)">
+<div id="chatWindow">
 
-<button onclick="sendData()">Analyze Lead</button>
+<div id="chatHeader">
+AI Website Assistant
+</div>
 
-<div id="response"></div>
+<div id="chatMessages">
+Hello 👋  
+What service do you need? (Website, App, SEO etc)
+</div>
+
+<div id="chatInput">
+<input id="userInput" placeholder="Type here...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
 </div>
 
 <script>
 
-async function sendData(){
+let step = 0;
 
-const service = document.getElementById("service").value;
-const industry = document.getElementById("industry").value;
-const budget = document.getElementById("budget").value;
-const timeline = document.getElementById("timeline").value;
+let data = {
+service:"",
+industry:"",
+budget:"",
+timeline:""
+};
+
+function toggleChat(){
+let chat = document.getElementById("chatWindow");
+chat.style.display = chat.style.display==="flex"?"none":"flex";
+}
+
+function addMessage(text){
+let box = document.getElementById("chatMessages");
+box.innerHTML += "\n\n" + text;
+box.scrollTop = box.scrollHeight;
+}
+
+async function sendMessage(){
+
+let input = document.getElementById("userInput");
+let message = input.value;
+
+addMessage("You: " + message);
+
+if(step===0){
+data.service = message;
+addMessage("Bot: Which industry?");
+}
+
+else if(step===1){
+data.industry = message;
+addMessage("Bot: Budget range?");
+}
+
+else if(step===2){
+data.budget = message;
+addMessage("Bot: Timeline?");
+}
+
+else if(step===3){
+data.timeline = message;
+
+addMessage("Bot: Analyzing requirement...");
 
 const res = await fetch("https://ai-chatbot-backend-ykda.onrender.com/chat",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({
-service,
-industry,
-budget,
-timeline
-})
+body:JSON.stringify(data)
 });
 
-const data = await res.json();
+const result = await res.json();
 
-document.getElementById("response").innerText = data.reply;
+addMessage("Bot:\n" + result.reply);
+}
 
+step++;
+
+input.value="";
 }
 
 </script>
