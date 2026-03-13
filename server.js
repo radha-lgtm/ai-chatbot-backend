@@ -111,7 +111,21 @@ priority === "Hot"
 Next Step:
 Book a strategy call to finalize the project scope.
 `;
-
+awaitfetch("https://eo55dzhh2t6zcjo.m.pipedream.net", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+service: req.body.service,
+industry: req.body.industry,
+budget: req.body.budget,
+timeline: req.body.timeline,
+score: score,
+priority: priority,
+time: new Date()
+})
+});
 res.json({ reply });
 
 });

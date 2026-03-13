@@ -169,6 +169,13 @@ step++;
 input.value="";
 }
 
+document.getElementById("userInput").addEventListener("keypress", function(event) {
+if (event.key === "Enter") {
+event.preventDefault();
+sendMessage();
+}
+});
+
 </script>
 
 </body>
