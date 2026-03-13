@@ -366,6 +366,28 @@ setTimeout(()=>{
 
 botMessage("Service Recommendation\n"+parts[1]);
 
+setTimeout(()=>{
+
+botMessage(`
+Click below to schedule a consultation:
+
+<a href="https://calendly.com/radha200530/30min" target="_blank">
+<button style="
+padding:8px 12px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-top:5px;">
+Book Strategy Call
+botMessage("Would you like to discuss your project with our team?");
+</button>
+</a>
+`);
+
+},1200);
+
 },800);
 
 step=0;
