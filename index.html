@@ -1,102 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>AI Website Assistant</title>
+<title>AI Chatbot Assistant</title>
 
 <style>
+
 body{
-font-family:Arial;
-background:#f5f5f5;
-height:2000px;
+font-family: Arial;
+background:#f4f6f9;
 }
 
-/* Chat Button */
+/* Floating button */
 
 #chatButton{
 position:fixed;
 bottom:25px;
 right:25px;
+width:65px;
+height:65px;
 background:#007bff;
-color:white;
-border:none;
 border-radius:50%;
-width:60px;
-height:60px;
-font-size:26px;
+color:white;
+font-size:28px;
+display:flex;
+align-items:center;
+justify-content:center;
 cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Chat Window */
+/* Chat window */
 
-#chatWindow{
+#chatBox{
+display:none;
 position:fixed;
 bottom:100px;
 right:25px;
 width:320px;
 background:white;
-border-radius:10px;
-box-shadow:0 6px 20px rgba(0,0,0,0.2);
-display:none;
-flex-direction:column;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+overflow:hidden;
 }
+
+/* Header */
 
 #chatHeader{
 background:#007bff;
 color:white;
-padding:10px;
-border-radius:10px 10px 0 0;
+padding:12px;
 font-weight:bold;
 }
 
-#chatMessages{
-height:250px;
+/* Messages */
+
+#messages{
+height:260px;
 overflow-y:auto;
 padding:10px;
-font-size:14px;
-white-space:pre-line;
+background:#fafafa;
 }
 
-#chatInput{
+/* User message */
+
+.user{
+background:#007bff;
+color:white;
+padding:8px;
+border-radius:8px;
+margin:6px 0;
+width:80%;
+margin-left:auto;
+}
+
+/* Bot message */
+
+.bot{
+background:#e9ecef;
+padding:8px;
+border-radius:8px;
+margin:6px 0;
+width:80%;
+}
+
+/* Input */
+
+#inputArea{
 display:flex;
-border-top:1px solid #eee;
+border-top:1px solid #ddd;
 }
 
-#chatInput input{
+#inputArea input{
 flex:1;
 border:none;
 padding:10px;
 outline:none;
 }
 
-#chatInput button{
+#inputArea button{
 background:#007bff;
 color:white;
 border:none;
 padding:10px 15px;
 cursor:pointer;
 }
-</style>
 
+</style>
 </head>
 
 <body>
 
-<button id="chatButton" onclick="toggleChat()">💬</button>
+<div id="chatButton" onclick="toggleChat()">💬</div>
 
-<div id="chatWindow">
+<div id="chatBox">
 
-<div id="chatHeader">
-AI Website Assistant
-</div>
+<div id="chatHeader">AI Assistant</div>
 
-<div id="chatMessages">
-Hello 👋  
-What service do you need? (Website, App, SEO etc)
-</div>
+<div id="messages"></div>
 
-<div id="chatInput">
-<input id="userInput" placeholder="Type here...">
+<div id="inputArea">
+<input id="messageInput" placeholder="Type message...">
 <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -104,74 +127,50 @@ What service do you need? (Website, App, SEO etc)
 
 <script>
 
-let step = 0;
-
-let data = {
-service:"",
-industry:"",
-budget:"",
-timeline:""
-};
-
 function toggleChat(){
-let chat = document.getElementById("chatWindow");
-chat.style.display = chat.style.display==="flex"?"none":"flex";
-}
-
-function addMessage(text){
-let box = document.getElementById("chatMessages");
-box.innerHTML += "\n\n" + text;
-box.scrollTop = box.scrollHeight;
+const box=document.getElementById("chatBox");
+box.style.display=box.style.display==="block"?"none":"block";
 }
 
 async function sendMessage(){
 
-let input = document.getElementById("userInput");
-let message = input.value;
+const input=document.getElementById("messageInput");
+const text=input.value;
 
-addMessage("You: " + message);
+if(!text) return;
 
-if(step===0){
-data.service = message;
-addMessage("Bot: Which industry?");
-}
+const messages=document.getElementById("messages");
 
-else if(step===1){
-data.industry = message;
-addMessage("Bot: Budget range?");
-}
+messages.innerHTML+=`<div class="user">${text}</div>`;
 
-else if(step===2){
-data.budget = message;
-addMessage("Bot: Timeline?");
-}
+input.value="";
 
-else if(step===3){
-data.timeline = message;
-
-addMessage("Bot: Analyzing requirement...");
-
-const res = await fetch("https://ai-chatbot-backend-ykda.onrender.com/chat",{
+const response=await fetch("/chat",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify(data)
+body:JSON.stringify({
+service:text,
+industry:"general",
+budget:"unknown",
+timeline:"unknown"
+})
 });
 
-const result = await res.json();
+const data=await response.json();
 
-addMessage("Bot:\n" + result.reply);
+messages.innerHTML+=`<div class="bot">${data.reply}</div>`;
+
+messages.scrollTop=messages.scrollHeight;
+
 }
 
-step++;
+/* ENTER key send */
 
-input.value="";
-}
-
-document.getElementById("userInput").addEventListener("keypress", function(event) {
-if (event.key === "Enter") {
-event.preventDefault();
+document.getElementById("messageInput")
+.addEventListener("keypress",function(e){
+if(e.key==="Enter"){
 sendMessage();
 }
 });
