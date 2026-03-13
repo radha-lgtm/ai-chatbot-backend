@@ -36,7 +36,7 @@ display:none;
 position:fixed;
 bottom:100px;
 right:25px;
-width:320px;
+width:340px;
 background:white;
 border-radius:12px;
 box-shadow:0 10px 25px rgba(0,0,0,0.2);
@@ -55,7 +55,7 @@ font-weight:bold;
 /* Messages */
 
 #messages{
-height:260px;
+height:280px;
 overflow-y:auto;
 padding:10px;
 background:#fafafa;
@@ -83,6 +83,24 @@ margin:6px 0;
 width:80%;
 }
 
+/* Options buttons */
+
+.optionBtn{
+display:inline-block;
+padding:8px 12px;
+margin:5px;
+border-radius:20px;
+background:#eef3ff;
+border:1px solid #007bff;
+cursor:pointer;
+font-size:14px;
+}
+
+.optionBtn:hover{
+background:#007bff;
+color:white;
+}
+
 /* Input */
 
 #inputArea{
@@ -101,7 +119,7 @@ outline:none;
 background:#007bff;
 color:white;
 border:none;
-padding:10px 15px;
+padding:10px 12px;
 cursor:pointer;
 }
 
@@ -120,6 +138,7 @@ cursor:pointer;
 
 <div id="inputArea">
 <input id="messageInput" placeholder="Type message...">
+<button onclick="startVoice()">🎤</button>
 <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -136,89 +155,239 @@ budget:"",
 timeline:""
 };
 
+/* Toggle chat */
+
 function toggleChat(){
+
 const box=document.getElementById("chatBox");
+
 box.style.display=box.style.display==="block"?"none":"block";
 
 if(step===0){
-botMessage("Hi 👋 I'm your AI assistant.");
-botMessage("What service are you looking for?");
+
+botMessage("Hi 👋 Welcome to our AI assistant");
+botMessage("Choose your preferred language");
+
+showOptions(["English","Hindi"]);
+
 step=1;
-}
+
 }
 
+}
+
+/* Messages */
+
 function userMessage(text){
+
 const messages=document.getElementById("messages");
+
 messages.innerHTML+=`<div class="user">${text}</div>`;
+
 messages.scrollTop=messages.scrollHeight;
+
 }
 
 function botMessage(text){
+
 const messages=document.getElementById("messages");
+
 messages.innerHTML+=`<div class="bot">${text}</div>`;
+
 messages.scrollTop=messages.scrollHeight;
+
 }
+
+/* Option buttons */
+
+function showOptions(options){
+
+let html="";
+
+options.forEach(opt=>{
+html+=`<div class="optionBtn" onclick="selectOption('${opt}')">${opt}</div>`;
+});
+
+botMessage(html);
+
+}
+
+function selectOption(value){
+
+userMessage(value);
+
+document.getElementById("messageInput").value=value;
+
+sendMessage();
+
+}
+
+/* Voice input */
+
+function startVoice(){
+
+const recognition = new webkitSpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.onresult=function(event){
+
+const text=event.results[0][0].transcript;
+
+document.getElementById("messageInput").value=text;
+
+sendMessage();
+
+};
+
+recognition.start();
+
+}
+
+/* Send message */
 
 async function sendMessage(){
 
 const input=document.getElementById("messageInput");
+
 const text=input.value;
 
 if(!text) return;
 
 userMessage(text);
+
 input.value="";
 
+/* Language selected */
+
 if(step===1){
-lead.service=text;
-botMessage("Great. What industry is your business in?");
+
+botMessage("What service do you need?");
+
+showOptions([
+"Website Development",
+"AI Chatbot",
+"Mobile App",
+"Digital Marketing"
+]);
+
 step=2;
+
 return;
+
 }
+
+/* Service */
 
 if(step===2){
-lead.industry=text;
-botMessage("What is your estimated budget?");
+
+lead.service=text;
+
+botMessage("What industry is your business in?");
+
 step=3;
+
 return;
+
 }
+
+/* Industry */
 
 if(step===3){
-lead.budget=text;
-botMessage("What timeline are you looking at?");
+
+lead.industry=text;
+
+botMessage("Select your estimated budget");
+
+showOptions([
+"Under 50k",
+"50k - 1L",
+"1L - 2L",
+"2L+"
+]);
+
 step=4;
+
 return;
+
 }
 
+/* Budget */
+
 if(step===4){
+
+lead.budget=text;
+
+botMessage("Select project timeline");
+
+showOptions([
+"Urgent (1-2 weeks)",
+"1 Month",
+"2-3 Months"
+]);
+
+step=5;
+
+return;
+
+}
+
+/* Timeline */
+
+if(step===5){
+
 lead.timeline=text;
 
 botMessage("Analyzing your requirements...");
 
+/* Send to backend */
+
 const response = await fetch("https://ai-chatbot-backend-ykda.onrender.com/chat",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify(lead)
+
 });
 
 const data=await response.json();
 
-botMessage(data.reply);
+/* Split summary + recommendation */
+
+const parts=data.reply.split("Service Recommendation");
+
+botMessage(parts[0]);
+
+setTimeout(()=>{
+
+botMessage("Service Recommendation\n"+parts[1]);
+
+},800);
 
 step=0;
+
 lead={};
 
 }
 
 }
 
+/* Enter key */
+
 document.getElementById("messageInput")
+
 .addEventListener("keypress",function(e){
+
 if(e.key==="Enter"){
+
 sendMessage();
+
 }
+
 });
 
 </script>
