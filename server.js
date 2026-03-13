@@ -64,7 +64,7 @@ function calculateLeadScore(data) {
    API Route
 ============================ */
 
-app.post("/chat", (req, res) => {
+app.post("/chat", async (req, res) => {
 
   const score = calculateLeadScore(req.body);
 
@@ -111,7 +111,7 @@ priority === "Hot"
 Next Step:
 Book a strategy call to finalize the project scope.
 `;
-awaitfetch("https://eo55dzhh2t6zcjo.m.pipedream.net", {
+await fetch("https://eo55dzhh2t6zcjo.m.pipedream.net", {
 method: "POST",
 headers: {
 "Content-Type": "application/json"
